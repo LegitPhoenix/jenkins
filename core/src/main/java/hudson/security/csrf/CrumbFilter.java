@@ -146,14 +146,16 @@ public class CrumbFilter implements Filter {
                 if (crumbIssuer.validateCrumb(httpRequest, crumbSalt, crumb)) {
                     valid = true;
                 } else {
-                    LOGGER.log(level, "Found invalid crumb {0}. If you are calling this URL with a script, please use the API Token instead. More information: https://www.jenkins.io/redirect/crumb-cannot-be-used-for-script", crumb);
+                    String sanitizedCrumb = crumb.replace("\r", "\\r").replace("\n", "\\n");
+                    LOGGER.log(level, "Found invalid crumb {0}. If you are calling this URL with a script, please use the API Token instead. More information: https://www.jenkins.io/redirect/crumb-cannot-be-used-for-script", sanitizedCrumb);
                 }
             }
 
             if (valid) {
                 chain.doFilter(request, response);
             } else {
-                LOGGER.log(level, "No valid crumb was included in request for {0} by {1}. Returning {2}.", new Object[] {httpRequest.getRequestURI(), Jenkins.getAuthentication2().getName(), HttpServletResponse.SC_FORBIDDEN});
+                String sanitizedUri = httpRequest.getRequestURI().replace("\r", "\\r").replace("\n", "\\n");
+                LOGGER.log(level, "No valid crumb was included in request for {0} by {1}. Returning {2}.", new Object[] {sanitizedUri, Jenkins.getAuthentication2().getName(), HttpServletResponse.SC_FORBIDDEN});
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "No valid crumb was included in the request");
             }
         } else {
