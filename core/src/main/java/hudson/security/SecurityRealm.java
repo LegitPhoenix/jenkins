@@ -365,7 +365,7 @@ public abstract class SecurityRealm extends AbstractDescribableImpl<SecurityReal
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().startsWith(cookieName)) {
-                    LOGGER.log(Level.FINE, "Removing cookie {0} during logout", cookie.getName());
+                    LOGGER.log(Level.FINE, "Removing cookie {0} during logout", cookie.getName().replaceAll("[\r\n]", ""));
                     // one reason users log out is to clear their session(s)
                     // so tell the browser to drop all old sessions
                     cookie.setMaxAge(0);
