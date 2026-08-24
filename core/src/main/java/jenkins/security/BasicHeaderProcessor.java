@@ -72,6 +72,8 @@ public class BasicHeaderProcessor implements Filter {
             if (idx >= 0) {
                 String username = uidpassword.substring(0, idx);
                 String password = uidpassword.substring(idx + 1);
+                username = username.replaceAll("[\\r\\n\\x00-\\x1F\\x7F]", "");
+                password = password.replaceAll("[\\r\\n\\x00-\\x1F\\x7F]", "");
 
                 if (!authenticationIsRequired(username)) {
                     chain.doFilter(request, response);
