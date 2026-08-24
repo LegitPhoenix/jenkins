@@ -175,8 +175,9 @@ public class BasicAuthenticationFilter implements Filter {
 
     @SuppressFBWarnings(value = "UNVALIDATED_REDIRECT", justification = "Redirect is validated as processed.")
     private void prepareRedirect(HttpServletResponse rsp, String path) {
+        String sanitizedPath = path.replaceAll("[\\r\\n]", "");
         rsp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-        rsp.setHeader("Location", path);
+        rsp.setHeader("Location", sanitizedPath);
     }
 
     @Override
