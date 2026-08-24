@@ -61,15 +61,24 @@ public class PaneStatusProperties extends UserProperty implements Saveable {
     private static class PaneStatusPropertiesSessionFallback extends PaneStatusProperties {
 
         private static final String attribute = "jenkins_pane_%s_collapsed";
+        private static final Pattern VALID_PANE_ID = Pattern.compile("^[a-zA-Z0-9_-]+$");
+
+        private static void validatePaneId(String paneId) {
+            if (paneId == null || !VALID_PANE_ID.matcher(paneId).matches()) {
+                throw new IllegalArgumentException("Invalid pane ID: " + paneId);
+            }
+        }
 
         @Override
         public boolean isCollapsed(String paneId) {
+            validatePaneId(paneId);
             final HttpSession session = Stapler.getCurrentRequest().getSession();
             return session.getAttribute(format(attribute, paneId)) != null;
         }
 
         @Override
         public boolean toggleCollapsed(String paneId) {
+            validatePaneId(paneId);
             final HttpSession session = Stapler.getCurrentRequest().getSession();
             final String property = format(attribute, paneId);
             final Object collapsed = session.getAttribute(property);
