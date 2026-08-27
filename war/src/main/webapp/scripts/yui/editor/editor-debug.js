@@ -6928,12 +6928,16 @@ var Dom = YAHOO.util.Dom,
                 html = html.replace(/  /gi, ' '); //Replace all double spaces and replace with a single
             }
             
+            var escapeRegExp = function(str) {
+                return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            };
+
             for (var v in this.invalidHTML) {
                 if (YAHOO.lang.hasOwnProperty(this.invalidHTML, v)) {
                     if (Lang.isObject(v) && v.keepContents) {
-                        html = html.replace(new RegExp('<' + v + '([^>]*)>(.*?)<\/' + v + '>', 'gi'), '$1');
+                        html = html.replace(new RegExp('<' + escapeRegExp(v) + '([^>]*)>(.*?)<\/' + escapeRegExp(v) + '>', 'gi'), '$1');
                     } else {
-                        html = html.replace(new RegExp('<' + v + '([^>]*)>(.*?)<\/' + v + '>', 'gi'), '');
+                        html = html.replace(new RegExp('<' + escapeRegExp(v) + '([^>]*)>(.*?)<\/' + escapeRegExp(v) + '>', 'gi'), '');
                     }
                 }
             }
