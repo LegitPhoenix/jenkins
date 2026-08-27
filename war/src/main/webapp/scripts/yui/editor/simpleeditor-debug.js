@@ -6849,8 +6849,9 @@ var Dom = YAHOO.util.Dom,
                 html = html.replace(/_width="([^>]*)"/gi, '');
                 html = html.replace(/_height="([^>]*)"/gi, '');
                 //Cleanup Image URL's
-                var url = this._baseHREF.replace(/\//gi, '\\/'),
-                    re = new RegExp('src="' + url, 'gi');
+                var url = this._baseHREF.replace(/\//gi, '\\/');
+                url = url.replace(/[[\]{}()*+?.\\/^$|]/g, '\\$&');
+                var re = new RegExp('src="' + url, 'gi');
                 html = html.replace(re, 'src="');
             }
 		    html = html.replace(/<font/gi, '<font');
