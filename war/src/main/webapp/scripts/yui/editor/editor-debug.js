@@ -6931,9 +6931,9 @@ var Dom = YAHOO.util.Dom,
             for (var v in this.invalidHTML) {
                 if (YAHOO.lang.hasOwnProperty(this.invalidHTML, v)) {
                     if (Lang.isObject(v) && v.keepContents) {
-                        html = html.replace(new RegExp('<' + v + '([^>]*)>(.*?)<\/' + v + '>', 'gi'), '$1');
+                        html = html.replace(new RegExp('<' + v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^>]*)>(.*?)<\/' + v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '>', 'gi'), '$1');
                     } else {
-                        html = html.replace(new RegExp('<' + v + '([^>]*)>(.*?)<\/' + v + '>', 'gi'), '');
+                        html = html.replace(new RegExp('<' + v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^>]*)>(.*?)<\/' + v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '>', 'gi'), '');
                     }
                 }
             }
