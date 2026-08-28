@@ -142,12 +142,11 @@ var crumb = {
     }
     var div = document.createElement("div");
     div.classList.add("jenkins-!-display-contents");
-    div.innerHTML =
-      "<input type=hidden name='" +
-      this.fieldName +
-      "' value='" +
-      this.value +
-      "'>";
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = this.fieldName;
+    input.value = this.value;
+    div.appendChild(input);
     form.appendChild(div);
     if (form.enctype == "multipart/form-data") {
       if (form.action.indexOf("?") != -1) {
