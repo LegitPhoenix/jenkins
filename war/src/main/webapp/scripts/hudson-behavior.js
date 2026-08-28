@@ -2651,6 +2651,24 @@ window.addEventListener("load", function () {
  * @see http://stackoverflow.com/questions/4845762/onload-handler-for-script-tag-in-internet-explorer
  */
 function loadScript(href, callback) {
+  // Validate that href is same-origin or relative
+  try {
+    // Relative URLs are safe
+    if (!href.includes('://') && !href.startsWith('//')) {
+      // Relative path, proceed
+    } else {
+      // Absolute URL - must be same origin
+      var url = new URL(href, window.location.href);
+      if (url.origin !== window.location.origin) {
+        console.error('Blocked loading script from untrusted origin:', href);
+        return;
+      }
+    }
+  } catch (e) {
+    console.error('Invalid script URL:', href);
+    return;
+  }
+
   var head =
     document.getElementsByTagName("head")[0] || document.documentElement;
   var script = document.createElement("script");
@@ -2684,7 +2702,6 @@ function loadScript(href, callback) {
   // This arises when a base node is used (#2709 and #4378).
   head.insertBefore(script, head.firstElementChild);
 }
-
 // logic behind <f:validateButton />
 // eslint-disable-next-line no-unused-vars
 function safeValidateButton(button) {
