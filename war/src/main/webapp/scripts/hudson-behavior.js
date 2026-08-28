@@ -2372,7 +2372,7 @@ function createSearchBox(searchURL) {
 
   // update positions and sizes of the components relevant to search
   function updatePos() {
-    sizer.innerHTML = escapeHTML(box.value);
+    sizer.textContent = box.value;
     var cssWidth,
       offsetWidth = sizer.offsetWidth;
     if (offsetWidth > 0) {
