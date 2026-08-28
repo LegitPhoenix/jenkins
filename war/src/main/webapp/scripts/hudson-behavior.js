@@ -118,7 +118,7 @@ var crumb = {
 
   /**
    * Adds the crumb value into the given hash or array and returns it.
-   */
+  */
   wrap: function (headers) {
     if (this.fieldName != null) {
       if (headers instanceof Array) {
@@ -142,12 +142,11 @@ var crumb = {
     }
     var div = document.createElement("div");
     div.classList.add("jenkins-!-display-contents");
-    div.innerHTML =
-      "<input type=hidden name='" +
-      this.fieldName +
-      "' value='" +
-      this.value +
-      "'>";
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = this.fieldName;
+    input.value = this.value;
+    div.appendChild(input);
     form.appendChild(div);
     if (form.enctype == "multipart/form-data") {
       if (form.action.indexOf("?") != -1) {
@@ -178,7 +177,6 @@ var isRunAsTest = undefined;
 // but the contextPath only, like /jenkins
 var rootURL = "not-defined-yet"; // eslint-disable-line no-unused-vars
 var resURL = "not-defined-yet"; // eslint-disable-line no-unused-vars
-
 (function initializeUnitTestAndURLs() {
   var dataUnitTest = document.head.getAttribute("data-unit-test");
   if (dataUnitTest !== null) {
