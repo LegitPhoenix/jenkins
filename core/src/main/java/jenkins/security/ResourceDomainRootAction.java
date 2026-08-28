@@ -253,7 +253,7 @@ public class ResourceDomainRootAction implements UnprotectedRootAction {
             } catch (AccessDeniedException ade) {
                 /* This is expected to be fairly common, as permission issues are thrown up as exceptions */
                 LOGGER.log(Level.FINE, "Failed permission check for resource URL access", ade);
-                rsp.sendError(403, "Failed permission check: " + ade.getMessage());
+                rsp.sendError(403, "Access denied");
             } catch (Exception e) {
                 /*
                 This should be fairly uncommon -- it's basically the 'rage' butler response. Notably, lack of access
