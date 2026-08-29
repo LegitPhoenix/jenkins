@@ -8806,7 +8806,21 @@ version: 2.9.0
                 } else {
 
                     oIcon = document.createElement("img");
-                    oIcon.src = (this.imageRoot + sIcon);
+                    
+                    // Validate sIcon to prevent malicious URLs
+                    if (/^[a-zA-Z0-9_\-\/]+\.[a-zA-Z0-9]+$/.test(sIcon) && 
+                        !sIcon.startsWith('http://') && 
+                        !sIcon.startsWith('https://') && 
+                        !sIcon.startsWith('//') && 
+                        !sIcon.startsWith('javascript:') && 
+                        !sIcon.startsWith('data:') &&
+                        sIcon.indexOf('..') === -1) {
+                        oIcon.src = (this.imageRoot + sIcon);
+                    } else {
+                        // Invalid icon path, skip or use default
+                        oIcon.src = this.imageRoot + "default.gif";
+                    }
+                    
                     oIcon.className = sCSSClass;
 
                 }
