@@ -666,6 +666,30 @@ public abstract class PluginManager extends AbstractModelObject implements OnMas
             }
             try {
                 URL url = context.getResource(pluginPath);
+                
+                // Validate path to prevent traversal attacks
+                if (url != null) {
+                    try {
+                        File pluginFile = new File(url.getFile());
+                        String canonicalPath = pluginFile.getCanonicalPath();
+                        
+                        // Determine expected base directory
+                        String realPath = context.getRealPath(fromPath);
+                        if (realPath != null) {
+                            File baseDir = new File(realPath);
+                            String canonicalBase = baseDir.getCanonicalPath();
+                            
+                            if (!canonicalPath.startsWith(canonicalBase)) {
+                                LOGGER.log(Level.WARNING, "Skipping plugin at path {0} due to path traversal attempt", pluginPath);
+                                continue;
+                            }
+                        }
+                    } catch (IOException e) {
+                        LOGGER.log(Level.WARNING, "Failed to validate path for plugin " + fileName + ", skipping", e);
+                        continue;
+                    }
+                }
+                
                 if (filter != null && url != null) {
                     if (!filter.accept(new File(url.getFile()).getParentFile(), fileName)) {
                         continue;
