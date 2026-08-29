@@ -8468,7 +8468,32 @@ var Dom = YAHOO.util.Dom,
                         }
                         
                         if (url && url.value && (url.value != this.STR_IMAGE_HERE)) {
-                            this.currentElement[0].setAttribute('src', url.value);
+                            var _isValidImageUrl = function(urlStr) {
+                                if (!urlStr || typeof urlStr !== 'string') {
+                                    return false;
+                                }
+                                var trimmedUrl = urlStr.trim();
+                                if (trimmedUrl === '') {
+                                    return false;
+                                }
+                                // Check for allowed protocols
+                                var allowedProtocols = /^(https?:|data:)/i;
+                                // If URL has a protocol, it must be in the allowlist
+                                if (trimmedUrl.indexOf(':') !== -1) {
+                                    return allowedProtocols.test(trimmedUrl);
+                                }
+                                // Relative URLs (no protocol) are allowed
+                                return true;
+                            };
+                            
+                            if (_isValidImageUrl(url.value)) {
+                                this.currentElement[0].setAttribute('src', url.value);
+                            } else {
+                                YAHOO.log('Invalid or unsafe URL protocol detected', 'warn', 'Editor');
+                                Dom.addClass(url, 'warning');
+                                this.get('panel').setFooter('Invalid image URL. Only http, https, and data URLs are allowed.');
+                                return false;
+                            }
                             var self = this,
                                 img = new Image();
 
@@ -8496,7 +8521,9 @@ var Dom = YAHOO.util.Dom,
                             }, 800); //Bumped the timeout up to account for larger images..
 
                             if (url.value != this.STR_IMAGE_HERE) {
-                                img.src = url.value;
+                                if (_isValidImageUrl(url.value)) {
+                                    img.src = url.value;
+                                }
                             }
                         }
                     }
