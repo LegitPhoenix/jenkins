@@ -8694,7 +8694,19 @@ var Dom = YAHOO.util.Dom,
                 el = arguments[0].win.el;
 
             if (url && url.value && (url.value != this.STR_IMAGE_HERE)) {
-                el.setAttribute('src', url.value);
+                var imgUrlValue = url.value;
+                // Validate image URL to prevent malicious schemes
+                if (imgUrlValue.toLowerCase().indexOf('javascript:') === 0 || 
+                    imgUrlValue.toLowerCase().indexOf('vbscript:') === 0 ||
+                    (imgUrlValue.toLowerCase().indexOf('data:') === 0 && imgUrlValue.toLowerCase().indexOf('data:image/') !== 0)) {
+                    // Reject dangerous schemes
+                    return;
+                }
+                // Normalize relative URLs to absolute http URLs
+                if ((imgUrlValue.indexOf(':/'+'/') == -1) && (imgUrlValue.substring(0,1) != '/')) {
+                    imgUrlValue = 'http:/'+'/' + imgUrlValue;
+                }
+                el.setAttribute('src', imgUrlValue);
                 el.setAttribute('title', title.value);
                 el.setAttribute('alt', title.value);
                 var par = el.parentNode;
