@@ -198,7 +198,7 @@ var Dom = YAHOO.util.Dom,
                             var menu = this.get('menu');
                             for (var i = 0; i < menu.length; i++) {
                                 opt = document.createElement('option');
-                                opt.innerHTML = menu[i].text;
+                                opt.textContent = menu[i].text;
                                 opt.value = menu[i].value;
                                 if (menu[i].checked) {
                                     opt.selected = true;
@@ -233,7 +233,6 @@ var Dom = YAHOO.util.Dom,
                     }
                 }
             });
-
             /**
             * @attribute label
             * @description The text label for the button
