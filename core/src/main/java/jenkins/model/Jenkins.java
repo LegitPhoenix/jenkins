@@ -5237,7 +5237,31 @@ public class Jenkins extends AbstractCIBase implements DirectlyModifiableTopLeve
     }
 
     private boolean isAgentJnlpPath(String restOfPath, String prefix) {
-        return restOfPath.matches("(/manage)?/computer/[^/]+/" + prefix + "-agent[.]jnlp");
+        String path = restOfPath;
+        // Handle optional /manage prefix
+        if (path.startsWith("/manage")) {
+            path = path.substring(8); // Remove "/manage"
+        }
+        
+        // Must start with /computer/
+        if (!path.startsWith("/computer/")) {
+            return false;
+        }
+        
+        // Extract the part after /computer/
+        String afterComputer = path.substring(10); // Length of "/computer/"
+        
+        // Must end with the expected suffix
+        String expectedSuffix = "/" + prefix + "-agent.jnlp";
+        if (!afterComputer.endsWith(expectedSuffix)) {
+            return false;
+        }
+        
+        // Extract computer name (between /computer/ and the suffix)
+        String computerName = afterComputer.substring(0, afterComputer.length() - expectedSuffix.length());
+        
+        // Computer name must be non-empty and contain no slashes
+        return !computerName.isEmpty() && computerName.indexOf('/') == -1;
     }
 
     /**
