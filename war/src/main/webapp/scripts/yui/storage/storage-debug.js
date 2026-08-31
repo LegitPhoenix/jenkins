@@ -1048,7 +1048,7 @@ var Y = YAHOO,
 	 */	
 	MINIMUM_HEIGHT = 138,
 
-	RX_STORAGE_PREFIX = new RegExp('^(' + StorageManager.LOCATION_SESSION + '|' + StorageManager.LOCATION_LOCAL + ')'),
+	RX_STORAGE_PREFIX = /^(session|local)/,
 
 	// local variables
 	_driver = null,
@@ -1078,7 +1078,6 @@ var Y = YAHOO,
 			oCfg.attributes.flashVars.useCompression = 'true';
 			oCfg.attributes.version = 9.115;
 			_driver = new Y.widget.SWF(oCfg.containerID, oCfg.swfURL, oCfg.attributes);
-
 			// subscribe to save for info
 			_driver.subscribe('save', function(o) {
 				Y.log(o.message, 'info');
