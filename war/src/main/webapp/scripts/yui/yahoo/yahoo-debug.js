@@ -1031,7 +1031,7 @@ return (o && (typeof o === 'object' || L.isFunction(o))) || false;
 
         // restore saved {block}s
         for (i=saved.length-1; i>=0; i=i-1) {
-            s = s.replace(new RegExp("~-" + i + "-~"), "{"  + saved[i] + "}", "g");
+            s = s.split("~-" + i + "-~").join("{" + saved[i] + "}");
         }
 
         return s;
