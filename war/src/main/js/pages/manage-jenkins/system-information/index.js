@@ -10,7 +10,19 @@ graphHost.style.aspectRatio = `${imageWidth} / ${imageHeight}`;
 timespanSelect.addEventListener("change", () => {
   const rootURL = document.head.dataset.rooturl;
   const type = timespanSelect.value;
-  graphHost.innerHTML = `<img src="${rootURL}/extensionList/hudson.diagnosis.MemoryUsageMonitor/0/heap/graph?type=${type}&width=${imageWidth}&height=${imageHeight}" srcset="${rootURL}/extensionList/hudson.diagnosis.MemoryUsageMonitor/0/heap/graph?type=${type}&width=${imageWidth}&height=${imageHeight}&scale=2 2x" loading="lazy" style="width: 100%" alt="Memory usage graph"/>`;
+  // Clear existing content
+  graphHost.innerHTML = '';
+  
+  // Create img element safely using DOM APIs
+  const img = document.createElement('img');
+  img.src = `${rootURL}/extensionList/hudson.diagnosis.MemoryUsageMonitor/0/heap/graph?type=${type}&width=${imageWidth}&height=${imageHeight}`;
+  img.srcset = `${rootURL}/extensionList/hudson.diagnosis.MemoryUsageMonitor/0/heap/graph?type=${type}&width=${imageWidth}&height=${imageHeight}&scale=2 2x`;
+  img.loading = 'lazy';
+  img.style.width = '100%';
+  img.alt = 'Memory usage graph';
+  
+  // Append to container
+  graphHost.appendChild(img);
 });
 
 // Dispatch a change event to insert a graph on page load
