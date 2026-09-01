@@ -149,7 +149,40 @@ public final class ResourceDomainConfiguration extends GlobalConfiguration {
 
         // Send a request to /instance-identity/ at the resource root URL and check whether it is this Jenkins
         try {
-            URLConnection urlConnection = new URI(resourceRootUrlString + "instance-identity/").toURL().openConnection();
+            URI targetUri = new URI(resourceRootUrlString + "instance-identity/");
+            
+            // Validate scheme is http or https only
+            String scheme = targetUri.getScheme();
+            if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+                return FormValidation.error("Only http and https schemes are allowed");
+            }
+            
+            // Resolve hostname to IP addresses and check for internal/private addresses
+            String targetHost = targetUri.getHost();
+            if (targetHost == null) {
+                return FormValidation.error("Invalid URL: no host specified");
+            }
+            
+            try {
+                InetAddress[] addresses = InetAddress.getAllByName(targetHost);
+                for (InetAddress address : addresses) {
+                    if (address.isLoopbackAddress() || 
+                        address.isLinkLocalAddress() || 
+                        address.isSiteLocalAddress()) {
+                        return FormValidation.error("Requests to internal or private IP addresses are not allowed");
+                    }
+                    
+                    // Explicitly check for cloud metadata endpoint
+                    if (address.getHostAddress().equals("169.254.169.254")) {
+                        return FormValidation.error("Requests to internal or private IP addresses are not allowed");
+                    }
+                }
+            } catch (UnknownHostException ex) {
+                LOGGER.log(Level.CONFIG, "Failed to resolve hostname", ex);
+                return FormValidation.error("Unable to resolve hostname: " + ex.getMessage());
+            }
+            
+            URLConnection urlConnection = targetUri.toURL().openConnection();
             if (urlConnection instanceof HttpURLConnection) {
                 HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
                 int responseCode = httpURLConnection.getResponseCode();
