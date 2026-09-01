@@ -54,7 +54,7 @@
           graphImgTag.src = graphUrl;
           graphImgTag.srcset = graphUrl + "&scale=2 2x";
           graphImgTag.alt = graphAlt;
-          graphLocation.innerHTML = graphImgTag.outerHTML;
+          graphLocation.replaceChildren(graphImgTag);
         }
       }
     });
