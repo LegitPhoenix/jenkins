@@ -104,8 +104,7 @@ public class JSONSignatureValidator {
                     case ERROR:
                         return resultSha512;
                     case WARNING:
-                        LOGGER.log(Level.INFO, "JSON data source '" + name + "' does not provide a SHA-512 content checksum or signature. Looking for SHA-1.");
-                        break;
+                        return FormValidation.error("JSON data source '" + name + "' does not provide a SHA-512 content checksum or signature. SHA-1 is no longer accepted due to security vulnerabilities.");
                     case OK:
                         break;
                     default:
@@ -115,25 +114,8 @@ public class JSONSignatureValidator {
                 LOGGER.log(Level.WARNING, "Failed to verify potential SHA-512 digest/signature, falling back to SHA-1", nsa);
             }
 
-            // if we get here, SHA-512 passed, wasn't provided, or the JRE is terrible.
-
-            MessageDigest digest = MessageDigest.getInstance("SHA1");
-            Signature sig = Signature.getInstance("SHA1withRSA");
-            sig.initVerify(certs.get(0));
-            FormValidation resultSha1 = checkSpecificSignature(o, signature, digest, "correct_digest", sig, "correct_signature", "SHA-1");
-
-            switch (resultSha1.kind) {
-                case ERROR:
-                    return resultSha1;
-                case WARNING:
-                    if (resultSha512.kind == FormValidation.Kind.WARNING) {
-                        // neither signature provided
-                        return FormValidation.error("No correct_signature or correct_signature512 entry found in '" + name + "'.");
-                    }
-                case OK:
-                    break;
-                default:
-                    throw new AssertionError("Unknown form validation kind: " + resultSha1.kind);
+            if (resultSha512.kind != FormValidation.Kind.OK) {
+                return resultSha512;
             }
 
             if (warning != null)  return warning;
