@@ -53,7 +53,7 @@ public abstract class Hash {
     @SuppressFBWarnings(value = "PREDICTABLE_RANDOM", justification = "The random is just used for load distribution.")
     public static Hash from(String seed) {
         try {
-            MessageDigest md5 = getMd5();
+            MessageDigest md5 = getSha256();
             md5.update(seed.getBytes(StandardCharsets.UTF_8));
             byte[] digest = md5.digest();
 
@@ -76,10 +76,8 @@ public abstract class Hash {
         }
     }
 
-    // TODO JENKINS-60563 remove MD5 from all usages in Jenkins
-    @SuppressFBWarnings(value = "WEAK_MESSAGE_DIGEST_MD5", justification = "Should not be used for security.")
-    private static MessageDigest getMd5() throws NoSuchAlgorithmException {
-        return MessageDigest.getInstance("MD5");
+    private static MessageDigest getSha256() throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance("SHA-256");
     }
 
     /**
