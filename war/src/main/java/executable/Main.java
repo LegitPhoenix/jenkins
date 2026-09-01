@@ -528,13 +528,19 @@ public class Main {
      * People makes configuration mistakes, so we are trying to be nice
      * with those by doing {@link String#trim()}.
      */
-    @SuppressFBWarnings(value = "PATH_TRAVERSAL_IN", justification = "User provided values for running the program.")
     private static File getJenkinsHome() {
         // check the system property for the home directory first
         for (String name : HOME_NAMES) {
             String sysProp = System.getProperty(name);
             if (sysProp != null) {
-                return new File(sysProp.trim());
+                try {
+                    File homeDir = new File(sysProp.trim()).getCanonicalFile();
+                    // Return the canonical path to prevent traversal
+                    return homeDir;
+                } catch (IOException e) {
+                    System.err.println("Invalid path for " + name + ": " + sysProp + " - " + e.getMessage());
+                    // Continue to next candidate
+                }
             }
         }
 
@@ -542,7 +548,14 @@ public class Main {
         for (String name : HOME_NAMES) {
             String env = System.getenv(name);
             if (env != null) {
-                return new File(env.trim());
+                try {
+                    File homeDir = new File(env.trim()).getCanonicalFile();
+                    // Return the canonical path to prevent traversal
+                    return homeDir;
+                } catch (IOException e) {
+                    System.err.println("Invalid path for " + name + ": " + env + " - " + e.getMessage());
+                    // Continue to next candidate
+                }
             }
         }
 
