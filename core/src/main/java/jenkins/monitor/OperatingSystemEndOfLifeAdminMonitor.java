@@ -184,7 +184,7 @@ public class OperatingSystemEndOfLifeAdminMonitor extends AdministrativeMonitor 
         if (dataFile == null || !dataFile.exists()) {
             return "";
         }
-        Pattern pattern = Pattern.compile("^PRETTY_NAME=[\"](" + patternStr + ".*)[\"]");
+        Pattern pattern = Pattern.compile("^PRETTY_NAME=[\"](" + Pattern.quote(patternStr) + ".*)[\"]");
         String name = "";
         try {
             List<String> lines = dataFile.equals(lastDataFile) ? lastLines : Files.readAllLines(dataFile.toPath());
