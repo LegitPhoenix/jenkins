@@ -95,45 +95,19 @@ public class JSONSignatureValidator {
 
             // check the better digest first
             FormValidation resultSha512 = null;
-            try {
-                MessageDigest digest = MessageDigest.getInstance("SHA-512");
-                Signature sig = Signature.getInstance("SHA512withRSA");
-                sig.initVerify(certs.get(0));
-                resultSha512 = checkSpecificSignature(o, signature, digest, "correct_digest512", sig, "correct_signature512", "SHA-512");
-                switch (resultSha512.kind) {
-                    case ERROR:
-                        return resultSha512;
-                    case WARNING:
-                        LOGGER.log(Level.INFO, "JSON data source '" + name + "' does not provide a SHA-512 content checksum or signature. Looking for SHA-1.");
-                        break;
-                    case OK:
-                        break;
-                    default:
-                        throw new AssertionError("Unknown form validation kind: " + resultSha512.kind);
-                }
-            } catch (NoSuchAlgorithmException nsa) {
-                LOGGER.log(Level.WARNING, "Failed to verify potential SHA-512 digest/signature, falling back to SHA-1", nsa);
-            }
-
-            // if we get here, SHA-512 passed, wasn't provided, or the JRE is terrible.
-
-            MessageDigest digest = MessageDigest.getInstance("SHA1");
-            Signature sig = Signature.getInstance("SHA1withRSA");
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            Signature sig = Signature.getInstance("SHA512withRSA");
             sig.initVerify(certs.get(0));
-            FormValidation resultSha1 = checkSpecificSignature(o, signature, digest, "correct_digest", sig, "correct_signature", "SHA-1");
-
-            switch (resultSha1.kind) {
+            resultSha512 = checkSpecificSignature(o, signature, digest, "correct_digest512", sig, "correct_signature512", "SHA-512");
+            switch (resultSha512.kind) {
                 case ERROR:
-                    return resultSha1;
+                    return resultSha512;
                 case WARNING:
-                    if (resultSha512.kind == FormValidation.Kind.WARNING) {
-                        // neither signature provided
-                        return FormValidation.error("No correct_signature or correct_signature512 entry found in '" + name + "'.");
-                    }
+                    return FormValidation.error("No SHA-512 signature found in '%s'. SHA-1 is no longer supported due to collision vulnerabilities.", name);
                 case OK:
                     break;
                 default:
-                    throw new AssertionError("Unknown form validation kind: " + resultSha1.kind);
+                    throw new AssertionError("Unknown form validation kind: " + resultSha512.kind);
             }
 
             if (warning != null)  return warning;
