@@ -42,6 +42,8 @@ public class JavaVMArguments {
 
         // Legacy approach of last resort
         List<String> args = new ArrayList<>();
+        // java.home is a JVM system property set by the runtime, not user-controlled input.
+        // Safe to use in path construction.
         args.add(
                 Paths.get(System.getProperty("java.home"))
                         .resolve("bin")
