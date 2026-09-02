@@ -227,7 +227,16 @@ public final class ProxyConfiguration extends AbstractDescribableImpl<ProxyConfi
         List<Pattern> r = new ArrayList<>();
         for (String s : noProxyHost.split("[ \t\n,|]+")) {
             if (s.isEmpty())  continue;
-            r.add(Pattern.compile(s.replace(".", "\\.").replace("*", ".*")));
+            if (!s.matches("[a-zA-Z0-9.*-]+")) {
+                // Log warning and skip invalid pattern
+                continue;
+            }
+            try {
+                r.add(Pattern.compile(s.replace(".", "\\.").replace("*", ".*")));
+            } catch (PatternSyntaxException e) {
+                // Log the exception and continue
+                continue;
+            }
         }
         return r;
     }
