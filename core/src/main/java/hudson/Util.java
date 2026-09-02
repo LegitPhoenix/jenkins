@@ -631,21 +631,21 @@ public class Util {
      * @param source
      *      The stream will be closed by this method at the end of this method.
      * @return
-     *      32-char wide string
+     *      64-char wide string
      * @see DigestUtils#md5Hex(InputStream)
      */
     @NonNull
     public static String getDigestOf(@NonNull InputStream source) throws IOException {
         try (source) {
-            MessageDigest md5 = getMd5();
-            try (InputStream in = new DigestInputStream(source, md5); OutputStream out = OutputStream.nullOutputStream()) {
+            MessageDigest sha256 = getSha256();
+            try (InputStream in = new DigestInputStream(source, sha256); OutputStream out = OutputStream.nullOutputStream()) {
                 // Note: IOUtils.copy() buffers the input internally, so there is no
                 // need to use a BufferedInputStream.
                 IOUtils.copy(in, out);
             }
-            return toHexString(md5.digest());
+            return toHexString(sha256.digest());
         } catch (NoSuchAlgorithmException e) {
-            throw new IOException("MD5 not installed", e);    // impossible
+            throw new IOException("SHA-256 not installed", e);    // impossible
         }
         /* JENKINS-18178: confuses Maven 2 runner
         try {
@@ -656,12 +656,10 @@ public class Util {
         */
     }
 
-    // TODO JENKINS-60563 remove MD5 from all usages in Jenkins
-    @SuppressFBWarnings(value = "WEAK_MESSAGE_DIGEST_MD5", justification =
-            "This method should only be used for non-security applications where the MD5 weakness is not a problem.")
+    // TODO JENKINS-60563 This instance has been migrated to SHA-256
     @Deprecated
-    private static MessageDigest getMd5() throws NoSuchAlgorithmException {
-        return MessageDigest.getInstance("MD5");
+    private static MessageDigest getSha256() throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance("SHA-256");
     }
 
     @NonNull
@@ -676,7 +674,7 @@ public class Util {
     /**
      * Computes the MD5 digest of a file.
      * @param file a file
-     * @return a 32-character string
+     * @return a 64-character string
      * @throws IOException in case reading fails
      * @since 1.525
      */
