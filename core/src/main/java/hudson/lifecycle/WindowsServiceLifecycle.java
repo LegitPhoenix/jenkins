@@ -137,8 +137,34 @@ public class WindowsServiceLifecycle extends Lifecycle {
         task.getLogger().println("Restarting a service");
         String exe = System.getenv("WINSW_EXECUTABLE");
         File executable;
-        if (exe != null)   executable = new File(exe);
-        else            executable = new File(home, "hudson.exe");
+        if (exe != null) {
+            File candidateExecutable = new File(exe);
+            try {
+                File canonicalExecutable = candidateExecutable.getCanonicalFile();
+                File canonicalHome = home.getCanonicalFile();
+                
+                // Verify the executable is within the home directory
+                File parent = canonicalExecutable.getParentFile();
+                if (parent != null && parent.equals(canonicalHome)) {
+                    String fileName = canonicalExecutable.getName();
+                    // Verify the filename matches expected executables
+                    if ("hudson.exe".equals(fileName) || "jenkins.exe".equals(fileName)) {
+                        executable = canonicalExecutable;
+                    } else {
+                        LOGGER.log(Level.WARNING, "WINSW_EXECUTABLE filename '" + fileName + "' does not match expected executables. Falling back to default.");
+                        executable = new File(home, "hudson.exe");
+                    }
+                } else {
+                    LOGGER.log(Level.WARNING, "WINSW_EXECUTABLE path is outside Jenkins home directory. Falling back to default.");
+                    executable = new File(home, "hudson.exe");
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Failed to canonicalize WINSW_EXECUTABLE path. Falling back to default.", e);
+                executable = new File(home, "hudson.exe");
+            }
+        } else {
+            executable = new File(home, "hudson.exe");
+        }
         if (!executable.exists())   executable = new File(home, "jenkins.exe");
 
         // use restart! to run hudson/jenkins.exe restart in a separate process, so it doesn't kill itself
