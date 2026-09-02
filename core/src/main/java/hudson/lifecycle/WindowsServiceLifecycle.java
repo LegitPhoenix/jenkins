@@ -110,6 +110,11 @@ public class WindowsServiceLifecycle extends Lifecycle {
         String baseName = dest.getName();
         baseName = baseName.substring(0, baseName.indexOf('.'));
 
+        // Validate baseName to prevent path traversal
+        if (baseName.contains("/") || baseName.contains("\\") || baseName.contains("..") || baseName.equals(".")) {
+            throw new IOException("Invalid jenkins.war filename detected: potential path traversal attempt");
+        }
+
         File baseDir = getBaseDir();
         File copyFiles = new File(baseDir, baseName + ".copies");
 
