@@ -357,15 +357,29 @@ public class WebAppMain implements ServletContextListener {
         // check the system property for the home directory first
         for (String name : HOME_NAMES) {
             String sysProp = SystemProperties.getString(name);
-            if (sysProp != null)
-                return new FileAndDescription(new File(sysProp.trim()), "SystemProperties.getProperty(\"" + name + "\")");
+            if (sysProp != null) {
+                try {
+                    File candidate = new File(sysProp.trim());
+                    candidate = validateAndCanonicalizeHome(candidate);
+                    return new FileAndDescription(candidate, "SystemProperties.getProperty(\"" + name + "\")");
+                } catch (SecurityException | IOException e) {
+                    LOGGER.log(Level.WARNING, "Skipping system property " + name + " due to security validation failure", e);
+                }
+            }
         }
 
         // look at the env var next
         for (String name : HOME_NAMES) {
             String env = EnvVars.masterEnvVars.get(name);
-            if (env != null)
-                return new FileAndDescription(new File(env.trim()).getAbsoluteFile(), "EnvVars.masterEnvVars.get(\"" + name + "\")");
+            if (env != null) {
+                try {
+                    File candidate = new File(env.trim()).getAbsoluteFile();
+                    candidate = validateAndCanonicalizeHome(candidate);
+                    return new FileAndDescription(candidate, "EnvVars.masterEnvVars.get(\"" + name + "\")");
+                } catch (SecurityException | IOException e) {
+                    LOGGER.log(Level.WARNING, "Skipping environment variable " + name + " due to security validation failure", e);
+                }
+            }
         }
 
         // otherwise pick a place by ourselves
@@ -381,12 +395,45 @@ public class WebAppMain implements ServletContextListener {
         }
 
         File legacyHome = new File(new File(System.getProperty("user.home")), ".hudson");
-        if (legacyHome.exists()) {
-            return new FileAndDescription(legacyHome, "$user.home/.hudson"); // before rename, this is where it was stored
+        try {
+            legacyHome = validateAndCanonicalizeHome(legacyHome);
+            if (legacyHome.exists()) {
+                return new FileAndDescription(legacyHome, "$user.home/.hudson"); // before rename, this is where it was stored
+            }
+        } catch (SecurityException | IOException e) {
+            LOGGER.log(Level.WARNING, "Skipping legacy home directory due to security validation failure", e);
         }
 
         File newHome = new File(new File(System.getProperty("user.home")), ".jenkins");
-        return new FileAndDescription(newHome, "$user.home/.jenkins");
+        try {
+            newHome = validateAndCanonicalizeHome(newHome);
+            return new FileAndDescription(newHome, "$user.home/.jenkins");
+        } catch (SecurityException | IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to validate Jenkins home directory. Falling back to safe default in temp directory.", e);
+            File safeDefault = new File(System.getProperty("java.io.tmpdir"), "jenkins-home-fallback");
+            return new FileAndDescription(safeDefault, "Safe fallback: java.io.tmpdir/jenkins-home-fallback");
+        }
+    }
+
+    private File validateAndCanonicalizeHome(File homeDir) throws IOException, SecurityException {
+        String canonicalPath = homeDir.getCanonicalPath();
+        
+        // Check for sensitive system directories on Unix-like systems
+        if (canonicalPath.startsWith("/etc/") || canonicalPath.equals("/etc") ||
+            canonicalPath.startsWith("/root/") || canonicalPath.equals("/root") ||
+            canonicalPath.startsWith("/sys/") || canonicalPath.equals("/sys") ||
+            canonicalPath.startsWith("/proc/") || canonicalPath.equals("/proc")) {
+            throw new SecurityException("Jenkins home directory cannot be in system directory: " + canonicalPath);
+        }
+        
+        // Check for sensitive system directories on Windows
+        String lowerPath = canonicalPath.toLowerCase();
+        if (lowerPath.startsWith("c:\\windows\\") || lowerPath.equals("c:\\windows") ||
+            lowerPath.startsWith("c:\\program files\\") || lowerPath.equals("c:\\program files")) {
+            throw new SecurityException("Jenkins home directory cannot be in system directory: " + canonicalPath);
+        }
+        
+        return new File(canonicalPath);
     }
 
     @Override
