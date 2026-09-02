@@ -335,6 +335,11 @@ public class CLI {
         } catch (InvalidPathException e) {
             throw new IOException(e);
         }
+        Path allowedBase = Paths.get(System.getProperty("user.home")).toRealPath();
+        Path canonicalPath = path.toRealPath();
+        if (!canonicalPath.startsWith(allowedBase)) {
+            throw new IOException("Authentication file must be within user home directory");
+        }
         return Files.readString(path, Charset.defaultCharset());
     }
 
