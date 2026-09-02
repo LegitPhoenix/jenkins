@@ -207,10 +207,10 @@ public class ClassicPluginStrategy implements PluginStrategy {
         }
         File disableFile = new File(archive.getPath() + ".disabled");
         if (disableFile.exists()) {
-            LOGGER.info("Plugin " + archive.getName() + " is disabled");
+            LOGGER.log(Level.INFO, "Plugin {0} is disabled", archive.getName());
         }
         if (paths.isEmpty()) {
-            LOGGER.info("No classpaths found for plugin " + archive.getName());
+            LOGGER.log(Level.INFO, "No classpaths found for plugin {0}", archive.getName());
         }
 
         // compute dependencies
@@ -240,7 +240,6 @@ public class ClassicPluginStrategy implements PluginStrategy {
 
     private void fix(Attributes atts, List<PluginWrapper.Dependency> optionalDependencies) {
         String pluginName = atts.getValue("Short-Name");
-
         String jenkinsVersion = atts.getValue("Jenkins-Version");
         if (jenkinsVersion == null)
             jenkinsVersion = atts.getValue("Hudson-Version");
