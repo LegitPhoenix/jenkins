@@ -179,7 +179,7 @@ public class CLI {
             }
             if (head.equals("-noCertificateCheck")) {
                 LOGGER.info("Skipping HTTPS certificate checks altogether. Note that this is not secure at all.");
-                SSLContext context = SSLContext.getInstance("TLS");
+                SSLContext context = SSLContext.getInstance("TLSv1.2");
                 context.init(null, new TrustManager[]{new NoCheckTrustManager()}, new SecureRandom());
                 HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
                 // bypass host name check, too.
