@@ -424,7 +424,7 @@ public class ClassicPluginStrategy implements PluginStrategy {
     private static void parseClassPath(Manifest manifest, File archive, List<File> paths, String attributeName, String separator) throws IOException {
         String classPath = manifest.getMainAttributes().getValue(attributeName);
         if (classPath == null) return; // attribute not found
-        for (String s : classPath.split(separator)) {
+        for (String s : classPath.split(Pattern.quote(separator))) {
             File file = resolve(archive, s);
             if (file.getName().contains("*")) {
                 // handle wildcard
